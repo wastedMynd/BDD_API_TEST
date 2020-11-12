@@ -4,7 +4,7 @@ import io.restassured.response.Response;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-public class TestDogApi{
+public class TestDogApi {
 
     // region  requirements
 
@@ -29,13 +29,13 @@ public class TestDogApi{
     }
 
     private static final RestAssuredResponseRequirementsValidatorInterface REQUIREMENTS = (Response response) -> {
-            response.then().statusCode(STATUS_CODE).statusLine(STATUS_LINE)               // server feedback ok ?
-                    .contentType(Matchers.equalTo(CONTENT_TYPE))                          // content in json ?
-                    .body("$", Matchers.hasKey(EXPECTED_STATUS_KEY))                            // is this key present
-                    .body("$", Matchers.hasKey(EXPECTED_MESSAGE_KEY))                           // is this key present ?
-                    .assertThat().body(EXPECTED_STATUS_KEY, Matchers.equalTo(EXPECTED_STATUS)); // is status ?
-            return response;
-        };
+        response.then().statusCode(STATUS_CODE).statusLine(STATUS_LINE)               // server feedback ok ?
+                .contentType(Matchers.equalTo(CONTENT_TYPE))                          // content in json ?
+                .body("$", Matchers.hasKey(EXPECTED_STATUS_KEY))                            // is this key present
+                .body("$", Matchers.hasKey(EXPECTED_MESSAGE_KEY))                           // is this key present ?
+                .assertThat().body(EXPECTED_STATUS_KEY, Matchers.equalTo(EXPECTED_STATUS)); // is status ?
+        return response;
+    };
 
 
     private static Response get_response_and_validate_it(String from_url) {
@@ -62,7 +62,7 @@ public class TestDogApi{
         final String BREED = "bulldog";
         for (Object sub_breed_object :
                 get_response_and_validate_it(String.format("%sbreed/%s/list", BASE_URL, BREED))
-                .jsonPath().getList(EXPECTED_MESSAGE_KEY)
+                        .jsonPath().getList(EXPECTED_MESSAGE_KEY)
         ) {
 
             String sub_breed = (String) sub_breed_object;
@@ -71,8 +71,9 @@ public class TestDogApi{
 
             for (Object actual_sub_breed_image_object :
                     get_response_and_validate_it(String.format("%sbreed/%s/%s/images", BASE_URL, BREED, sub_breed))
-                    .jsonPath().getList(EXPECTED_MESSAGE_KEY)
-            ) System.out.printf("image src = %s \n", actual_sub_breed_image_object);
+                            .jsonPath().getList(EXPECTED_MESSAGE_KEY)
+            )
+                System.out.printf("image src = %s \n", actual_sub_breed_image_object);
 
             System.out.println();
         }
