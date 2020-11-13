@@ -7,26 +7,6 @@ import com.aventstack.extentreports.reporter.configuration.Theme;
 import org.junit.*;
 
 /**
- * <p>
- * Using a BDD Framework and REST Assured create an automated script using the below API
- *
- * <p>
- * B.<b><u>https://petstore.swagger.io</u></b>
- *      <ol>
- *              <li>
- *                  Retrieve all available pets and confirm that the name “doggie” with category id "12" is on the list
- *              </li>
- *              <li>
- *                  Add a new pet with an auto generated name and status available - Confirm the new pet has been added
- *              </li>
- *              <li>
- *                  From point 2 above retrieve the created pet using the ID
- *              </li>
- *      </ol>
- *  </p>
- *
- * </p>
- *
  * @author Sizwe I. Mkhonza
  * @since 13 November 2020
  */
