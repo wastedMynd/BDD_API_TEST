@@ -1,12 +1,14 @@
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.reporter.ExtentHtmlReporter;
+import com.aventstack.extentreports.reporter.configuration.Theme;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 
 import java.util.*;
 
-import org.hamcrest.Matchers;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+//git# removed unused imports
+import org.junit.*;
 
 /**
  * <p>
@@ -34,12 +36,36 @@ import org.junit.Test;
  */
 public class TestPetStoreSwaggerApi {
 
+    // helper report variables
+    private static ExtentTest logger;
+    private static ExtentReports extent = new ExtentReports();
+    private static final String REPORT_FILE_PATH = "./test_reports/TestPetStoreSwaggerApi_Report.html";
+    private static final String OS_NAME = "ubuntu";
+    private static final String OS_USERNAME = "sizwe";
+    private static final String REPORT_DOC_TITLE = "Class: TestPetStoreSwaggerApi";
+
+    // helper test variable
     private static final String BASE_URL = "https://petstore.swagger.io/v2";
 
-    private static enum PetStatus {available, pending, sold}
+    private enum PetStatus {available, pending, sold}
+
+    @BeforeClass
+    public static void before_any_tests() {
+        reportsInitialization();
+    }
 
     @Test
-    public void retrieve_all_available_pats_and_confirm_that_the_name_doggie_is_on_the_list() {
+    public void retrieve_all_available_pets() {
+
+        //region reporting initialization
+        provideTestNameAndDescription(
+                        "retrieve_all_available_pets",
+                        "1. Retrieve all available pets and confirm that the name 'doggie'" +
+                        " with category id '12' is on the list\n"
+        );
+        //endregion
+
+        //region testing
 
         //We'd like to get pets that have a status that is available...
         PetStatus pet_status = PetStatus.available;
@@ -69,8 +95,8 @@ public class TestPetStoreSwaggerApi {
         final String PET_NAME = "doggie";
         final Number PET_CATEGORY_ID = 120;
 
-        String failureMessage = String.format("Pet %s with category id %s was not found!", PET_NAME,PET_CATEGORY_ID);
-        String passMessage = String.format("Pet %s with category id %s found!", PET_NAME,PET_CATEGORY_ID);
+        String failureMessage = String.format("Pet %s with category id %s was not found!", PET_NAME, PET_CATEGORY_ID);
+        String passMessage = String.format("Pet %s with category id %s found!", PET_NAME, PET_CATEGORY_ID);
 
         // search on this list...
         ArrayList<LinkedHashMap<String, Object>> list_of_available_pets = response.jsonPath().get();
@@ -93,23 +119,93 @@ public class TestPetStoreSwaggerApi {
             }
         }
 
+        if (is_pet_found_on_the_list_of_available_pets)
+            logger.pass(passMessage);
+        else
+            logger.fail(failureMessage);
+
         //... and then afterwards;
         Assert.assertTrue(failureMessage, is_pet_found_on_the_list_of_available_pets);
         // if the above assertion is false
         // (being that is_pet_found_on_the_list_of_available_pets is equal to false);
         // then the test failed!
 
-        System.out.println(passMessage);
-    }
-
-    @Ignore
-    public void add_a_new_pet_with_an_auto_generated_name_and_status_available_confirm_the_new_pet_has_been_added() {
+        //endregion
 
     }
 
-    @Ignore
-    public void from_point_2_above_retrieve_the_created_pet_using_the_id() {
+    @Test
+    public void add_a_new_pet() {
+        //todo Add a new pet with an auto generated name
+        //todo and status available
+        //todo Confirm the new pet has been added
+
+        //region reporting initialization
+        provideTestNameAndDescription(
+                "add_a_new_pet",
+                "2. Add a new pet with an auto generated name" +
+                        " and status available " +
+                        "- Confirm the new pet has been added\n"
+        );
+        //endregion
+
+        //region testing
+        logger.fail("Test Script Not Implemented...");
+        Assert.assertTrue("Test Script Not Implemented...", false);
+        //endregion
 
     }
+
+    @Test
+    public void retrieve_the_created_pet() {
+        // todo retrieve the created pet using the ID given on the test above
+
+        //region reporting initialization
+        provideTestNameAndDescription(
+                "retrieve_the_created_pet",
+                "3. From point 2 above, retrieve the created pet using the ID\n"
+        );
+        //endregion
+
+        //region testing
+        logger.fail("Test Script Not Implemented...");
+        Assert.assertTrue("Test Script Not Implemented...", false);
+        //endregion
+
+    }
+
+    @After
+    public void after_a_test() {
+        generateReport();
+    }
+
+    //region helper report methods
+
+    public static void reportsInitialization() {
+        ExtentHtmlReporter reporter = new ExtentHtmlReporter(REPORT_FILE_PATH);
+
+        // Environment Setup
+        extent.setSystemInfo("OS Name", OS_NAME);
+        extent.setSystemInfo("Username", OS_USERNAME);
+
+        reporter.config().setDocumentTitle(REPORT_DOC_TITLE);
+        reporter.config().setReportName(REPORT_DOC_TITLE);
+        reporter.config().setTheme(Theme.DARK);
+
+        extent.attachReporter(reporter);
+
+    }
+
+    private static void provideTestNameAndDescription(String testName, String testDescription) {
+        logger = extent.createTest(
+                "TestCase: " + testName,
+                "Description: "+ testDescription);
+    }
+
+    public void generateReport() {
+        extent.flush();
+    }
+
+    //endregion
 
 }
