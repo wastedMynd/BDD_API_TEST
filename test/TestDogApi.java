@@ -1,3 +1,4 @@
+import com.aventstack.extentreports.ExtentTest;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.junit.Test;
@@ -58,12 +59,16 @@ import static org.hamcrest.Matchers.hasKey;
  * @author Sizwe I. Mkhonza
  * @since 10 Nov 2020
  */
-public class TestDogApi {
+public class TestDogApi extends TestWithReporting {
 
     private static final String BASE_URL = "https://dog.ceo/api/";
     private static final String EXPECTED_STATUS = "success";
     private static final String EXPECTED_STATUS_KEY = "status";
     private static final String EXPECTED_MESSAGE_KEY = "message";
+
+    public TestDogApi() {
+        super("ubuntu", "sizwe", TestDogApi.class.getSimpleName());
+    }
 
     /**
      * Helper Method / Function, that...
@@ -90,19 +95,67 @@ public class TestDogApi {
      *
      * @param response is {@link Response} from a GET request
      **/
-    private void then_validate_response(Response response) {
-        response.then().statusCode(200).statusLine("HTTP/1.1 200 OK")
-                .contentType(equalTo("application/json"))
-                .body("$", hasKey(EXPECTED_STATUS_KEY)) //body has key
-                .body("$", hasKey(EXPECTED_MESSAGE_KEY)) //body has key
-                .assertThat().body(EXPECTED_STATUS_KEY, equalTo(EXPECTED_STATUS));
+    private static void then_validate_response(Response response) {
+
+        try {
+            response.then().statusCode(200).statusLine("HTTP/1.1 200 OK");
+            logger.pass("good header info on response!");
+        } catch (AssertionError e) {
+            logger.fail("bad header info on response!");
+            throw e;
+        }
+
+        try {
+            response.then().contentType(equalTo("application/json"));
+            logger.pass("response in json format.");
+        } catch (AssertionError e) {
+            logger.fail("bad response not in json format!");
+            throw e;
+        }
+
+        try {
+
+            response.then().body("$", hasKey(EXPECTED_MESSAGE_KEY)); //body has key
+
+            logger.pass(String.format("key found %s in response.", EXPECTED_MESSAGE_KEY));
+
+        } catch (AssertionError e) {
+            logger.fail(String.format("expected key %s in response!", EXPECTED_MESSAGE_KEY));
+            throw e;
+        }
+
+        try {
+
+            response.then().body("$", hasKey(EXPECTED_STATUS_KEY)); //body has key
+
+            logger.pass(String.format("key found %s in response.", EXPECTED_STATUS_KEY));
+
+        } catch (AssertionError e) {
+            logger.fail(String.format("expected key %s in response!", EXPECTED_STATUS_KEY));
+            throw e;
+        }
+
+        try {
+            response.then().assertThat().body(EXPECTED_STATUS_KEY, equalTo(EXPECTED_STATUS));
+            logger.pass(String.format("%s == %s ;  pass", response.jsonPath().get(EXPECTED_STATUS_KEY), EXPECTED_STATUS));
+        } catch (AssertionError e) {
+            logger.fail(String.format("%s == %s ; fail", response.jsonPath().get(EXPECTED_STATUS_KEY), EXPECTED_STATUS));
+            throw e;
+        }
+
     }
 
     /**
-     * 1. Verify that a successful message is returned when a user searches for random breeds
+1. Verify that a successful message is returned when a user searches for random breeds
      */
     @Test
     public void random_breed_search_is_successful() {
+
+        reportTestNameAndDescription(
+                "random_breed_search_is_successful",
+                "1. Verify that a successful message is returned when a user searches for random breeds"
+        );
+
 
         String random_breed = "hound";
 
@@ -115,10 +168,17 @@ public class TestDogApi {
     }
 
     /**
-     * 2. Verify that bulldog is on the list of all breeds
+2. Verify that bulldog is on the list of all breeds
      */
     @Test
     public void bulldog_is_on_the_list_of_breeds() {
+
+        reportTestNameAndDescription(
+                "bulldog_is_on_the_list_of_breeds",
+                "2. Verify that bulldog is on the list of all breeds"
+        );
+
+
 
         final String BREED = "bulldog";
 
@@ -128,7 +188,14 @@ public class TestDogApi {
 
         then_validate_response(response);
 
-        response.then().assertThat().body(EXPECTED_MESSAGE_KEY, hasKey(BREED));
+        try {
+            response.then().assertThat().body(EXPECTED_MESSAGE_KEY, hasKey(BREED));
+            logger.pass(String.format("In list of all breeds; breed %s was found.", BREED));
+        } catch (AssertionError e) {
+            logger.fail(String.format("In list of all breeds; breed %s was not found.", BREED));
+            throw e;
+        }
+
 
     }
 
@@ -137,6 +204,13 @@ public class TestDogApi {
      */
     @Test
     public void retrieve_all_sub_breeds_for_bulldog_and_their_respective_images() {
+
+        reportTestNameAndDescription(
+                "retrieve_all_sub_breeds_for_bulldog_and_their_respective_images",
+                "3. Retrieve all sub-breeds for bulldogs and their respective images"
+        );
+
+
 
         final String BREED = "bulldog";
 
