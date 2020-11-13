@@ -1,7 +1,3 @@
-import com.aventstack.extentreports.ExtentReports;
-import com.aventstack.extentreports.ExtentTest;
-import com.aventstack.extentreports.reporter.ExtentHtmlReporter;
-import com.aventstack.extentreports.reporter.configuration.Theme;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 
@@ -34,31 +30,23 @@ import org.junit.*;
  * @author Sizwe I. Mkhonza
  * @since 13 November 2020
  */
-public class TestPetStoreSwaggerApi {
-
-    // helper report variables
-    private static ExtentTest logger;
-    private static ExtentReports extent = new ExtentReports();
-    private static final String REPORT_FILE_PATH = "./test_reports/TestPetStoreSwaggerApi_Report.html";
-    private static final String OS_NAME = "ubuntu";
-    private static final String OS_USERNAME = "sizwe";
-    private static final String REPORT_DOC_TITLE = "Class: TestPetStoreSwaggerApi";
+public class TestPetStoreSwaggerApi extends TestWithReporting {
 
     // helper test variable
     private static final String BASE_URL = "https://petstore.swagger.io/v2";
 
+    public TestPetStoreSwaggerApi() {
+        super("ubuntu", "sizwe", TestPetStoreSwaggerApi.class.getSimpleName());
+    }
+
     private enum PetStatus {available, pending, sold}
 
-    @BeforeClass
-    public static void before_any_tests() {
-        reportsInitialization();
-    }
 
     @Test
     public void retrieve_all_available_pets() {
 
         //region reporting initialization
-        provideTestNameAndDescription(
+        reportTestNameAndDescription(
                         "retrieve_all_available_pets",
                         "1. Retrieve all available pets and confirm that the name 'doggie'" +
                         " with category id '12' is on the list\n"
@@ -141,7 +129,7 @@ public class TestPetStoreSwaggerApi {
         //todo Confirm the new pet has been added
 
         //region reporting initialization
-        provideTestNameAndDescription(
+        reportTestNameAndDescription(
                 "add_a_new_pet",
                 "2. Add a new pet with an auto generated name" +
                         " and status available " +
@@ -161,7 +149,7 @@ public class TestPetStoreSwaggerApi {
         // todo retrieve the created pet using the ID given on the test above
 
         //region reporting initialization
-        provideTestNameAndDescription(
+        reportTestNameAndDescription(
                 "retrieve_the_created_pet",
                 "3. From point 2 above, retrieve the created pet using the ID\n"
         );
@@ -173,39 +161,5 @@ public class TestPetStoreSwaggerApi {
         //endregion
 
     }
-
-    @After
-    public void after_a_test() {
-        generateReport();
-    }
-
-    //region helper report methods
-
-    public static void reportsInitialization() {
-        ExtentHtmlReporter reporter = new ExtentHtmlReporter(REPORT_FILE_PATH);
-
-        // Environment Setup
-        extent.setSystemInfo("OS Name", OS_NAME);
-        extent.setSystemInfo("Username", OS_USERNAME);
-
-        reporter.config().setDocumentTitle(REPORT_DOC_TITLE);
-        reporter.config().setReportName(REPORT_DOC_TITLE);
-        reporter.config().setTheme(Theme.DARK);
-
-        extent.attachReporter(reporter);
-
-    }
-
-    private static void provideTestNameAndDescription(String testName, String testDescription) {
-        logger = extent.createTest(
-                "TestCase: " + testName,
-                "Description: "+ testDescription);
-    }
-
-    public void generateReport() {
-        extent.flush();
-    }
-
-    //endregion
 
 }
