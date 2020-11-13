@@ -79,6 +79,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.codeartisans/org.json -->
+        <dependency>
+            <groupId>org.codeartisans</groupId>
+            <artifactId>org.json</artifactId>
+            <version>20161124</version>
+        </dependency>
+
     </dependencies>
 
 </project>
