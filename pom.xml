@@ -79,6 +79,17 @@
             <scope>test</scope>
         </dependency>
 
+
+        <!-- reporting  html-->
+
+        <!-- https://mvnrepository.com/artifact/io.cucumber/cucumber-java -->
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-java</artifactId>
+            <version>6.8.2</version>
+        </dependency>
+
+
     </dependencies>
 
 </project>
