@@ -88,14 +88,12 @@ public class TestPetStoreSwaggerApi {
 
     //endregion
 
-
     @BeforeClass
-    public static void TestPetS() {
-        reporter = new HtmlReporter(
-                "ubuntu",
-                "sizwe",
-                TestPetStoreSwaggerApi.class.getSimpleName()
-        );
+    public static void initialize() { reporter = new HtmlReporter(TestPetStoreSwaggerApi.class.getSimpleName()); }
+
+    @AfterClass
+    public static void tearDown() {
+        reporter.publishTestReport();
     }
 
     //region Test Cases
@@ -329,10 +327,5 @@ public class TestPetStoreSwaggerApi {
     }
 
     //endregion
-
-    @AfterClass
-    public static void tearDown() {
-        reporter.publishTestReport();
-    }
 
 }

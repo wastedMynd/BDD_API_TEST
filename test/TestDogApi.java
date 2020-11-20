@@ -175,14 +175,12 @@ public class TestDogApi {
 
     //endregion
 
-
     @BeforeClass
-    public static void initialize() {
-        reporter = new HtmlReporter(
-                "ubuntu",
-                "sizwe",
-                TestDogApi.class.getSimpleName()
-        );
+    public static void initialize() { reporter = new HtmlReporter(TestDogApi.class.getSimpleName()); }
+
+    @AfterClass
+    public static void tearDown() {
+        reporter.publishTestReport();
     }
 
     //region Test Cases
@@ -285,10 +283,5 @@ public class TestDogApi {
     }
 
     //endregion
-
-    @AfterClass
-    public static void tearDown() {
-        reporter.publishTestReport();
-    }
 
 }

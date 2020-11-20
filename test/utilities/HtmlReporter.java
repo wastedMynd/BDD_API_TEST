@@ -39,12 +39,11 @@ public class HtmlReporter {
 
     //endregion
 
-    public HtmlReporter(String operating_system, String tester, String report_doc_title) {
+    public HtmlReporter(String report_doc_title) {
 
         // region environment Setup
-
-        extent.setSystemInfo("operating system", operating_system);
-        extent.setSystemInfo("tester", tester);
+        extent.setSystemInfo("operating system", System.getProperty("os.name"));
+        extent.setSystemInfo("tester", System.getProperty("user.name"));
 
         //endregion
 
