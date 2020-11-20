@@ -11,6 +11,7 @@ import java.util.Random;
 
 import org.json.JSONObject;
 import org.junit.*;
+import utilities.HtmlReporter;
 
 /**
  * <p>
@@ -36,55 +37,74 @@ import org.junit.*;
  * @author Sizwe I. Mkhonza
  * @since 13 November 2020
  */
-public class TestPetStoreSwaggerApi extends TestWithReporting {
+public class TestPetStoreSwaggerApi {
 
-    // helper test variable
+    //region  helper variables
+
+    private static HtmlReporter reporter;
     private static final String BASE_URL = "https://petstore.swagger.io/v2";
 
-    //helper methods
+    //endregion
 
-    public String[] getRandomlyNames(final int generateSize) {
+    //region helper methods
+
+    public String[] getRandomNames(final int generateSize) {
 
         HashSet<String> list = new HashSet<>();
 
         Random ran = new Random(26);
 
         for (int i = 0; i < generateSize; ++i) {
+
             String name;
 
             do {
+
                 name = RandomStringUtils.randomAlphanumeric(ran.nextInt(generateSize) + 1);
+
             } while (list.contains(name));
 
             list.add(name);
+
         }
 
         return list.toArray(new String[]{});
     }
 
     private String getRandomPetName() {
-        String[] pet_names = getRandomlyNames(10);
+
+        String[] pet_names = getRandomNames(10);
+
         Random ran = new Random(pet_names.length);
+
         int random_name_index = ran.nextInt(pet_names.length - 1);
+
         String random_name = pet_names[random_name_index];
-        logger.info("Random name chosen for your pet: " + random_name);
+
+        reporter.getLogger().info("Random name chosen for your pet: " + random_name);
+
         return random_name;
     }
 
-    private enum PetStatus {available, pending, sold}
+    //endregion
 
 
-    //test constructor
-    public TestPetStoreSwaggerApi() {
-        super("ubuntu", "sizwe", TestPetStoreSwaggerApi.class.getSimpleName());
+    @BeforeClass
+    public static void TestPetS() {
+        reporter = new HtmlReporter(
+                "ubuntu",
+                "sizwe",
+                TestPetStoreSwaggerApi.class.getSimpleName()
+        );
     }
 
+    //region Test Cases
 
     @Test
     public void retrieve_all_available_pets() {
 
         //region reporting initialization
-        reportTestNameAndDescription(
+        reporter.createTestCaseReport(
                 "retrieve_all_available_pets",
                 "1. Retrieve all available pets and confirm that the name 'doggie'" +
                         " with category id '12' is on the list\n"
@@ -93,14 +113,10 @@ public class TestPetStoreSwaggerApi extends TestWithReporting {
 
         //region testing
 
-        //We'd like to get pets that have a status that is available...
-        PetStatus pet_status = PetStatus.available;
-
-        // parse the pet status name from our PetStatus enum
-        String pet_status_name = pet_status.name();
+        String pet_status = "available";
 
         // compose a pet status url, with this pet status name
-        String pet_status_url = String.format("%s/pet/findByStatus?status=%s", BASE_URL, pet_status_name);
+        String pet_status_url = String.format("%s/pet/findByStatus?status=%s", BASE_URL, pet_status);
 
         // send a get request to the PetStoreApi, and get the response back...
         Response response = RestAssured.get(pet_status_url);
@@ -110,9 +126,13 @@ public class TestPetStoreSwaggerApi extends TestWithReporting {
             // then after; let's check if the response header is ok...
             // remember status code 200 is ok, and 400 is an invalid status value.
             response.then().statusCode(200).statusLine("HTTP/1.1 200 OK");
-            logger.pass("Good response...");
+
+            reporter.getLogger().pass("Good response...");
+
         } catch (AssertionError e) {
-            logger.fail("Bad response...");
+
+            reporter.getLogger().fail("Bad response...");
+
             throw e;
         }
 
@@ -120,9 +140,13 @@ public class TestPetStoreSwaggerApi extends TestWithReporting {
             // and also check that the content type on the response header is of type 'application/json';
             // this tells us that the content of the response is in JSON format...
             response.then().contentType("application/json");
-            logger.pass("Good content...");
+
+            reporter.getLogger().pass("Good content...");
+
         } catch (AssertionError e) {
-            logger.fail("Bad content...");
+
+            reporter.getLogger().fail("Bad content...");
+
             throw e;
         }
 
@@ -151,15 +175,18 @@ public class TestPetStoreSwaggerApi extends TestWithReporting {
             Object pet_content_category_id = pet_content_category != null ? pet_content_category.get("id") : -1;
 
             if (pet_name.equals(PET_NAME) && pet_content_category_id.equals(PET_CATEGORY_ID)) {
+
                 is_pet_found_on_the_list_of_available_pets = true;
+
                 break; //exiting the search...
+
             }
         }
 
         if (is_pet_found_on_the_list_of_available_pets)
-            logger.pass(passMessage);
+            reporter.getLogger().pass(passMessage);
         else
-            logger.fail(failureMessage);
+            reporter.getLogger().fail(failureMessage);
 
         //... and then afterwards;
         Assert.assertTrue(failureMessage, is_pet_found_on_the_list_of_available_pets);
@@ -175,7 +202,7 @@ public class TestPetStoreSwaggerApi extends TestWithReporting {
     public void add_a_new_pet() {
 
         //region reporting initialization
-        reportTestNameAndDescription(
+        reporter.createTestCaseReport(
                 "add_a_new_pet",
                 "2. Add a new pet with an auto generated name" +
                         " and status available " +
@@ -183,7 +210,7 @@ public class TestPetStoreSwaggerApi extends TestWithReporting {
         );
         //endregion
 
-        //region  Add a new pet with an auto generated name
+        //region testing  Add a new pet with an auto generated name
         //and status available
         //Confirm the new pet has been added
 
@@ -215,7 +242,7 @@ public class TestPetStoreSwaggerApi extends TestWithReporting {
         JSONObject[] tags = {request_tags_params};
         request_params.put("tags", tags);
 
-        request_params.put("status", PetStatus.available.name());
+        request_params.put("status", "available");
 
         //endregion
 
@@ -232,9 +259,13 @@ public class TestPetStoreSwaggerApi extends TestWithReporting {
             // then after; let's check if the response header is ok...
             // remember status code 200 is ok, and 400 is an invalid status value.
             response.then().statusCode(200).statusLine("HTTP/1.1 200 OK");
-            logger.pass("Pet Added.");
+
+            reporter.getLogger().pass("Pet Added.");
+
         } catch (AssertionError e) {
-            logger.fail("Pet Not Added");
+
+            reporter.getLogger().fail("Pet Not Added");
+
             throw e;
         }
 
@@ -242,31 +273,36 @@ public class TestPetStoreSwaggerApi extends TestWithReporting {
             // and also check that the content type on the response header is of type 'application/json';
             // this tells us that the content of the response is in JSON format...
             response.then().contentType("application/json");
-            logger.pass("Good content...");
+
+            reporter.getLogger().pass("Good content...");
+
         } catch (AssertionError e) {
-            logger.fail("Bad content...");
+
+            reporter.getLogger().fail("Bad content...");
+
             throw e;
         }
 
 
         Long pet_id = response.jsonPath().get("id");
         if (pet_id > 0) {
-            logger.pass(String.format("Pet has ID %d, and was created", pet_id));
+            reporter.getLogger().pass(String.format("Pet has ID %d, and was created", pet_id));
         } else {
-            logger.fail("Pet has No ID!");
+            reporter.getLogger().fail("Pet has No ID!");
         }
         //endregion
 
         //endregion
 
+
         //region reporting initialization
-        reportTestNameAndDescription(
+        reporter.createTestCaseReport(
                 "retrieve_the_created_pet",
                 "3. From point 2 above, retrieve the created pet using the ID\n"
         );
         //endregion
 
-        // region retrieve the created pet using the ID given on the test above
+        //region testing retrieve the created pet using the ID given on the test above
 
         String find_pet_by_id_pet_url = String.format("%s/pet/%d", BASE_URL, pet_id);
         response = RestAssured.get(find_pet_by_id_pet_url);
@@ -276,14 +312,27 @@ public class TestPetStoreSwaggerApi extends TestWithReporting {
             // then after; let's check if the response header is ok...
             // remember status code 200 is ok, and 400 is an invalid status value.
             response.then().statusCode(200).statusLine("HTTP/1.1 200 OK");
-            logger.pass(String.format("Pet with the Name %s with id %d; was found.", PET_NAME, pet_id));
+
+            reporter.getLogger().pass(String.format("Pet with the Name %s with id %d; was found.", PET_NAME, pet_id));
+
         } catch (AssertionError e) {
-            logger.fail(String.format("Pet with Name %s with id %d; was not found!", PET_NAME, pet_id));
+
+            reporter.getLogger().fail(String.format("Pet with Name %s with id %d; was not found!", PET_NAME, pet_id));
+
             throw e;
+
         }
         //endregion
 
         // endregion
+
+    }
+
+    //endregion
+
+    @AfterClass
+    public static void tearDown() {
+        reporter.publishTestReport();
     }
 
 }

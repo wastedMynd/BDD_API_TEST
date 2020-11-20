@@ -1,7 +1,9 @@
-import com.aventstack.extentreports.ExtentTest;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import utilities.HtmlReporter;
 
 import java.util.List;
 
@@ -59,16 +61,19 @@ import static org.hamcrest.Matchers.hasKey;
  * @author Sizwe I. Mkhonza
  * @since 10 Nov 2020
  */
-public class TestDogApi extends TestWithReporting {
+public class TestDogApi {
 
+    //region  helper variables
+
+    private static HtmlReporter reporter;
     private static final String BASE_URL = "https://dog.ceo/api/";
     private static final String EXPECTED_STATUS = "success";
     private static final String EXPECTED_STATUS_KEY = "status";
     private static final String EXPECTED_MESSAGE_KEY = "message";
 
-    public TestDogApi() {
-        super("ubuntu", "sizwe", TestDogApi.class.getSimpleName());
-    }
+    //endregion
+
+    //region Helper Method
 
     /**
      * Helper Method / Function, that...
@@ -95,67 +100,103 @@ public class TestDogApi extends TestWithReporting {
      *
      * @param response is {@link Response} from a GET request
      **/
-    private static void then_validate_response(Response response) {
+    private void then_validate_response(Response response) {
 
         try {
+
             response.then().statusCode(200).statusLine("HTTP/1.1 200 OK");
-            logger.pass("good header info on response!");
+
+            reporter.getLogger().pass("good header info on response!");
+
         } catch (AssertionError e) {
-            logger.fail("bad header info on response!");
+
+            reporter.getLogger().fail("bad header info on response!");
+
             throw e;
+
         }
 
         try {
+
             response.then().contentType(equalTo("application/json"));
-            logger.pass("response in json format.");
+
+            reporter.getLogger().pass("response in json format.");
+
         } catch (AssertionError e) {
-            logger.fail("bad response not in json format!");
+
+            reporter.getLogger().fail("bad response not in json format!");
+
             throw e;
+
         }
 
         try {
 
             response.then().body("$", hasKey(EXPECTED_MESSAGE_KEY)); //body has key
 
-            logger.pass(String.format("key found %s in response.", EXPECTED_MESSAGE_KEY));
+            reporter.getLogger().pass(String.format("key found %s in response.", EXPECTED_MESSAGE_KEY));
 
         } catch (AssertionError e) {
-            logger.fail(String.format("expected key %s in response!", EXPECTED_MESSAGE_KEY));
+
+            reporter.getLogger().fail(String.format("expected key %s in response!", EXPECTED_MESSAGE_KEY));
+
             throw e;
+
         }
 
         try {
 
             response.then().body("$", hasKey(EXPECTED_STATUS_KEY)); //body has key
 
-            logger.pass(String.format("key found %s in response.", EXPECTED_STATUS_KEY));
+            reporter.getLogger().pass(String.format("key found %s in response.", EXPECTED_STATUS_KEY));
 
         } catch (AssertionError e) {
-            logger.fail(String.format("expected key %s in response!", EXPECTED_STATUS_KEY));
+
+            reporter.getLogger().fail(String.format("expected key %s in response!", EXPECTED_STATUS_KEY));
+
             throw e;
+
         }
 
         try {
             response.then().assertThat().body(EXPECTED_STATUS_KEY, equalTo(EXPECTED_STATUS));
-            logger.pass(String.format("%s == %s ;  pass", response.jsonPath().get(EXPECTED_STATUS_KEY), EXPECTED_STATUS));
+
+            reporter.getLogger().pass(String.format("%s == %s ;  pass", response.jsonPath().get(EXPECTED_STATUS_KEY), EXPECTED_STATUS));
+
         } catch (AssertionError e) {
-            logger.fail(String.format("%s == %s ; fail", response.jsonPath().get(EXPECTED_STATUS_KEY), EXPECTED_STATUS));
+
+            reporter.getLogger().fail(String.format("%s == %s ; fail", response.jsonPath().get(EXPECTED_STATUS_KEY), EXPECTED_STATUS));
+
             throw e;
+
         }
 
     }
 
+    //endregion
+
+
+    @BeforeClass
+    public static void initialize() {
+        reporter = new HtmlReporter(
+                "ubuntu",
+                "sizwe",
+                TestDogApi.class.getSimpleName()
+        );
+    }
+
+    //region Test Cases
+
     /**
-1. Verify that a successful message is returned when a user searches for random breeds
+     * 1. Verify that a successful message is returned when a user searches for random breeds
      */
     @Test
     public void random_breed_search_is_successful() {
 
-        reportTestNameAndDescription(
+        reporter.createTestCaseReport(
                 "random_breed_search_is_successful",
                 "1. Verify that a successful message is returned when a user searches for random breeds"
         );
-
 
         String random_breed = "hound";
 
@@ -168,17 +209,15 @@ public class TestDogApi extends TestWithReporting {
     }
 
     /**
-2. Verify that bulldog is on the list of all breeds
+     * 2. Verify that bulldog is on the list of all breeds
      */
     @Test
     public void bulldog_is_on_the_list_of_breeds() {
 
-        reportTestNameAndDescription(
+        reporter.createTestCaseReport(
                 "bulldog_is_on_the_list_of_breeds",
                 "2. Verify that bulldog is on the list of all breeds"
         );
-
-
 
         final String BREED = "bulldog";
 
@@ -190,13 +229,15 @@ public class TestDogApi extends TestWithReporting {
 
         try {
             response.then().assertThat().body(EXPECTED_MESSAGE_KEY, hasKey(BREED));
-            logger.pass(String.format("In list of all breeds; breed %s was found.", BREED));
+
+            reporter.getLogger().pass(String.format("In list of all breeds; breed %s was found.", BREED));
+
         } catch (AssertionError e) {
-            logger.fail(String.format("In list of all breeds; breed %s was not found.", BREED));
+
+            reporter.getLogger().fail(String.format("In list of all breeds; breed %s was not found.", BREED));
+
             throw e;
         }
-
-
     }
 
     /**
@@ -205,12 +246,10 @@ public class TestDogApi extends TestWithReporting {
     @Test
     public void retrieve_all_sub_breeds_for_bulldog_and_their_respective_images() {
 
-        reportTestNameAndDescription(
+        reporter.createTestCaseReport(
                 "retrieve_all_sub_breeds_for_bulldog_and_their_respective_images",
                 "3. Retrieve all sub-breeds for bulldogs and their respective images"
         );
-
-
 
         final String BREED = "bulldog";
 
@@ -244,4 +283,12 @@ public class TestDogApi extends TestWithReporting {
             System.out.println();
         }
     }
+
+    //endregion
+
+    @AfterClass
+    public static void tearDown() {
+        reporter.publishTestReport();
+    }
+
 }
